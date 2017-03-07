@@ -3,66 +3,16 @@ var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser-example', { preload:
 
 function preload() {
 
-    game.load.tilemap('map', 'assets/catastrophi_level2.csv', null, Phaser.Tilemap.CSV);
-    game.load.image('tiles', 'assets/catastrophi_tiles_16.png');
-    game.load.spritesheet('player', 'assets/spaceman.png', 16, 16);
-
-}
-
-//from http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript/105074#105074
-function guid() {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  }
-  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-    s4() + '-' + s4() + s4() + s4();
-}
-
-function Client() {
+    game.load.tilemap('map', 'assets/tilemaps/csv/catastrophi_level2.csv', null, Phaser.Tilemap.CSV);
+    game.load.image('tiles', 'assets/tilemaps/tiles/catastrophi_tiles_16.png');
+    game.load.spritesheet('player', 'assets/sprites/spaceman.png', 16, 16);
 
 }
 
 var map;
 var layer;
 var cursors;
-var players = {};
-var id = guid(); //ger unique id
-players[id] = {}; //initialize player
-var player = players[id]; //shortcut to our player
-
-
-Client.prototype.openConnection = function() {
-  this.ws = new WebSocket("ws://127.0.0.1:8080");
-  this.connected = false;
-  this.ws.onmessage = this.onMessage.bind(this);
-  this.ws.onerror = this.displayError.bind(this);
-  this.ws.onopen = this.connectionOpen.bind(this);
-};
-
-Client.prototype.connectionOpen = function() {
-  this.connected = true;
-  myText.text = 'connected\n';
-};
-
-Client.prototype.onMessage = function(message) {
-  var msg = JSON.parse(message.data);
-  for (var key in msg) {
-    if (key in players) {
-      players[key].x = msg[key].x;
-      players[key].y = msg[key].y;
-    } else {
-      players[key] = game.add.sprite(48, 48, 'player', 1);
-      players[key].x = msg[key].x;
-      players[key].y = msg[key].y;
-    }
-  }
-};
-
-Client.prototype.displayError = function(err) {
-  console.log('Websocketerror: ' + err);
-};
+var player;
 
 function create() {
 
@@ -82,7 +32,7 @@ function create() {
     map.setCollisionBetween(54, 83);
 
     //  Un-comment this on to see the collision tiles
-    layer.debug = true;
+    // layer.debug = true;
 
     //  Player
     player = game.add.sprite(48, 48, 'player', 1);
@@ -102,8 +52,6 @@ function create() {
     var help = game.add.text(16, 16, 'Arrows to move', { font: '14px Arial', fill: '#ffffff' });
     help.fixedToCamera = true;
 
-    this.client = new Client();
-    this.client.openConnection();
 }
 
 function update() {
@@ -135,14 +83,6 @@ function update() {
     else
     {
         player.animations.stop();
-    }
-
-    if (this.client.connected) {
-      this.client.ws.send(JSON.stringify({
-        uuid: id,
-        x: player.x,
-        y: player.y
-      }));
     }
 
 }
